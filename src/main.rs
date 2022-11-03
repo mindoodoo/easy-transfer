@@ -1,5 +1,7 @@
+use std::{fs, process};
 use clap::Parser;
-use std::fs;
+use flate2::{self, write};
+use tar;
 
 // ─── Arg Struct For Clap ─────────────────────────────────────────────────────────────────────────
 #[derive(Parser, Debug)]
@@ -32,22 +34,39 @@ fn get_payload_type(filepath: String) -> Option<PayloadType> {
     }
 }
 
-fn create_tar_ball(source: fs::File)
+fn create_tar_ball(source: &str, output: &str) {
+    let file = fs::File::create(output).expect("File creation failed.");
+    let encoder = write::GzEncoder::new(file, flate2::Compression::default());
+    let mut tar_ball = tar::Builder::new(encoder);
+    tar_ball.append_dir_all(".", source.clone()).expect("Adding files to tar ball failed.");
+}
 
-fn create_copy(t: PayloadType) {
-    // Create temp dir
-    fs::create_dir("transfer_temp").expect("Directory creations failed.");
-
-    match t {
-        PayloadType::File(path) => fs::copy(path, "transfer_temp").expect("File copy failed."),
-        PayloadType::Folder(path) => {
-            let 
-        }
+fn prep_files(t: PayloadType) {
+    if let PayloadType::Folder(path) = t {
+            create_tar_ball(&path, "archive.tar.gz");
     };
-
 }
 
 fn main() {
     let args = Args::parse();
     let t = get_payload_type(args.filename);
+
+    // ─── Prepare Files ───────────────────────────────────────────────────────────────────────
+    match t {
+        None => {
+            println!("Invalid input file, exiting now...");
+            process::exit(1);
+        },
+        Some(x) => {
+            prep_files(x);
+        },
+    };
 }
+
+// fn main() {
+//     let file = fs::File::create("foo.tar").unwrap();
+//     let mut a = tar::Builder::new(file);
+
+//     a.append_dir_all(".", "src").unwrap();
+//     // a.append_file("file2.txt", &mut fs::File::open("file3.txt").unwrap()).unwrap();
+// }
