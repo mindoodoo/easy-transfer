@@ -68,7 +68,13 @@
                 "type": "input",
                 "name": "message",
                 "message": "This commit will:"
-            }
+            },
+            {
+                "type": "confirm",
+                "name": "show_message",
+                "message": "Do you want to add body message in commit?"
+                }
+
             ]
         }
     }
