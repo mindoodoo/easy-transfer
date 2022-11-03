@@ -1,7 +1,10 @@
+#![feature(decl_macro)] // Enable experimental rocket api
+
 use std::{fs, process};
 use clap::Parser;
 use flate2::{self, write};
 use tar;
+
 
 // ─── Arg Struct For Clap ─────────────────────────────────────────────────────────────────────────
 #[derive(Parser, Debug)]
@@ -47,6 +50,13 @@ fn prep_files(t: PayloadType) {
     };
 }
 
+// ─── Web Server ──────────────────────────────────────────────────────────────────────────────────
+#[rocket::get("/")]
+pub fn download() {
+    
+}
+
+
 fn main() {
     let args = Args::parse();
     let t = get_payload_type(args.filename);
@@ -61,6 +71,9 @@ fn main() {
             prep_files(x);
         },
     };
+
+    // ─── Run Web Server ──────────────────────────────────────────────────────────────────────
+    rocket::ignite().mount("/", rocket::routes![download]).launch();    
 }
 
 // fn main() {
